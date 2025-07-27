@@ -174,6 +174,16 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <script>
+        // Función para formatear precios en CLP
+        function formatearPrecio(precio) {
+            return new Intl.NumberFormat('es-CL', {
+                style: 'currency',
+                currency: 'CLP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(precio).replace('CLP', '').trim() + ' CLP';
+        }
+        
         // Actualizar contador del carrito
         function actualizarCarritoCount() {
             $.get('{% url "carrito" %}', function(data) {

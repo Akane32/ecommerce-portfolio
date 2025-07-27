@@ -26,7 +26,7 @@
                     <div class="col-md-6">
                         <h6>Información del Pedido</h6>
                         <p><strong>Fecha:</strong> {{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</p>
-                        <p><strong>Total:</strong> ${{ pedido.total }}</p>
+                        <p><strong>Total:</strong> {{ pedido.total_formateado }} CLP</p>
                         <p><strong>Método de Pago:</strong> {{ pedido.metodo_pago }}</p>
                         <p><strong>Pagado:</strong> 
                             {% if pedido.pagado %}
@@ -74,16 +74,16 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>${{ item.precio_unitario }}</td>
+                                <td>{{ item.precio_unitario_formateado }} CLP</td>
                                 <td>{{ item.cantidad }}</td>
-                                <td>${{ item.subtotal }}</td>
+                                <td>{{ item.subtotal_formateado }} CLP</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                                <td><strong>${{ pedido.total }}</strong></td>
+                                                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                            <td><strong>{{ pedido.total_formateado }} CLP</strong></td>
                             </tr>
                         </tfoot>
                     </table>

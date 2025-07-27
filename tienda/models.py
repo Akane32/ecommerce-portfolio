@@ -39,6 +39,26 @@ class Producto(models.Model):
     @property
     def tiene_descuento(self):
         return self.precio_anterior and self.precio_anterior > self.precio
+    
+    @property
+    def precio_formateado(self):
+        """Retorna el precio formateado con puntos de miles"""
+        return f"{int(self.precio):,}".replace(",", ".")
+    
+    @property
+    def precio_anterior_formateado(self):
+        """Retorna el precio anterior formateado con puntos de miles"""
+        if self.precio_anterior:
+            return f"{int(self.precio_anterior):,}".replace(",", ".")
+        return ""
+    
+    @property
+    def ahorro_formateado(self):
+        """Retorna el ahorro formateado con puntos de miles"""
+        if self.tiene_descuento:
+            ahorro = self.precio_anterior - self.precio
+            return f"{int(ahorro):,}".replace(",", ".")
+        return ""
 
     @property
     def porcentaje_descuento(self):
@@ -57,6 +77,11 @@ class Carrito(models.Model):
     @property
     def total(self):
         return sum(item.subtotal for item in self.items.all())
+    
+    @property
+    def total_formateado(self):
+        """Retorna el total formateado con puntos de miles"""
+        return f"{int(self.total):,}".replace(",", ".")
 
     @property
     def cantidad_items(self):
@@ -77,6 +102,11 @@ class ItemCarrito(models.Model):
     @property
     def subtotal(self):
         return self.producto.precio * self.cantidad
+    
+    @property
+    def subtotal_formateado(self):
+        """Retorna el subtotal formateado con puntos de miles"""
+        return f"{int(self.subtotal):,}".replace(",", ".")
 
 class Pedido(models.Model):
     ESTADO_CHOICES = [
@@ -110,6 +140,11 @@ class Pedido(models.Model):
 
     def __str__(self):
         return f"Pedido #{self.id} - {self.usuario.username}"
+    
+    @property
+    def total_formateado(self):
+        """Retorna el total formateado con puntos de miles"""
+        return f"{int(self.total):,}".replace(",", ".")
 
 class ItemPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='items')
@@ -124,3 +159,13 @@ class ItemPedido(models.Model):
     def save(self, *args, **kwargs):
         self.subtotal = self.cantidad * self.precio_unitario
         super().save(*args, **kwargs)
+    
+    @property
+    def precio_unitario_formateado(self):
+        """Retorna el precio unitario formateado con puntos de miles"""
+        return f"{int(self.precio_unitario):,}".replace(",", ".")
+    
+    @property
+    def subtotal_formateado(self):
+        """Retorna el subtotal formateado con puntos de miles"""
+        return f"{int(self.subtotal):,}".replace(",", ".")

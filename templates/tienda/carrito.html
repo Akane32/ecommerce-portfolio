@@ -37,7 +37,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>${{ item.producto.precio }}</td>
+                                    <td>{{ item.producto.precio_formateado }} CLP</td>
                                     <td>
                                         <div class="input-group" style="width: 120px;">
                                             <button class="btn btn-outline-secondary btn-sm cambiar-cantidad" 
@@ -49,7 +49,7 @@
                                                     data-action="increase" data-item-id="{{ item.id }}">+</button>
                                         </div>
                                     </td>
-                                    <td class="subtotal-item">${{ item.subtotal }}</td>
+                                    <td class="subtotal-item">{{ item.subtotal_formateado }} CLP</td>
                                     <td>
                                         <button class="btn btn-danger btn-sm eliminar-item" data-item-id="{{ item.id }}">
                                             <i class="fas fa-trash"></i>
@@ -80,7 +80,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
                     <span>Subtotal:</span>
-                    <span id="subtotal">${{ carrito.total }}</span>
+                    <span id="subtotal">{{ carrito.total_formateado }} CLP</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
                     <span>Envío:</span>
@@ -89,7 +89,7 @@
                 <hr>
                 <div class="d-flex justify-content-between mb-3">
                     <strong>Total:</strong>
-                    <strong id="total">${{ carrito.total }}</strong>
+                    <strong id="total">{{ carrito.total_formateado }} CLP</strong>
                 </div>
                 
                 {% if carrito.items.all %}
@@ -184,7 +184,13 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success) {
                     // Actualizar subtotal del item
-                    $('tr[data-item-id="' + itemId + '"] .subtotal-item').text('$' + response.item_subtotal);
+                    var formatoCLP = new Intl.NumberFormat('es-CL', {
+                        style: 'currency',
+                        currency: 'CLP',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    });
+                    $('tr[data-item-id="' + itemId + '"] .subtotal-item').text(formatoCLP.format(response.item_subtotal).replace('CLP', '').trim() + ' CLP');
                     
                     // Actualizar resumen
                     actualizarResumen(response.carrito_total);
@@ -204,8 +210,14 @@ $(document).ready(function() {
     }
     
     function actualizarResumen(total) {
-        $('#subtotal').text('$' + total);
-        $('#total').text('$' + total);
+        var formatoCLP = new Intl.NumberFormat('es-CL', {
+            style: 'currency',
+            currency: 'CLP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+        $('#subtotal').text(formatoCLP.format(total).replace('CLP', '').trim() + ' CLP');
+        $('#total').text(formatoCLP.format(total).replace('CLP', '').trim() + ' CLP');
     }
 });
 </script>
