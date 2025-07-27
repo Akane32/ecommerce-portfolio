@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}Productos - Mi Ecommerce{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Filtros -->
+    <div class="col-lg-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Filtros</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{% url 'lista_productos' %}">
+                    <!-- Búsqueda -->
+                    <div class="mb-3">
+                        <label for="q" class="form-label">Buscar</label>
+                        <input type="text" class="form-control" id="q" name="q" value="{{ busqueda }}" placeholder="Nombre del producto...">
+                    </div>
+                    
+                    <!-- Categorías -->
+                    <div class="mb-3">
+                        <label for="categoria" class="form-label">Categoría</label>
+                        <select class="form-select" id="categoria" name="categoria">
+                            <option value="">Todas las categorías</option>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}" {% if categoria_actual == categoria.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ categoria.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Orden -->
+                    <div class="mb-3">
+                        <label for="orden" class="form-label">Ordenar por</label>
+                        <select class="form-select" id="orden" name="orden">
+                            <option value="nombre" {% if orden == 'nombre' %}selected{% endif %}>Nombre A-Z</option>
+                            <option value="precio_asc" {% if orden == 'precio_asc' %}selected{% endif %}>Precio: Menor a Mayor</option>
+                            <option value="precio_desc" {% if orden == 'precio_desc' %}selected{% endif %}>Precio: Mayor a Menor</option>
+                            <option value="nuevos" {% if orden == 'nuevos' %}selected{% endif %}>Más Recientes</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
+                </form>
+                
+                {% if busqueda or categoria_actual %}
+                    <hr>
+                    <a href="{% url 'lista_productos' %}" class="btn btn-outline-secondary w-100">Limpiar Filtros</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Productos -->
+    <div class="col-lg-9">
+        <!-- Resultados -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Productos</h2>
+            <p class="text-muted mb-0">
+                {% if page_obj %}
+                    Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }} productos
+                {% else %}
+                    No se encontraron productos
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- Grid de Productos -->
+        <div class="row">
+            {% for producto in page_obj %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 product-card">
+                    <div class="position-relative">
+                        <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}">
+                        {% if producto.tiene_descuento %}
+                            <span class="badge bg-danger badge-discount">-{{ producto.porcentaje_descuento }}%</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ producto.nombre }}</h5>
+                        <p class="card-text text-muted">{{ producto.descripcion|truncatewords:15 }}</p>
+                        <p class="card-text">
+                            <small class="text-muted">Categoría: {{ producto.categoria.nombre }}</small>
+                        </p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="h5 text-primary mb-0">${{ producto.precio }}</span>
+                                {% if producto.tiene_descuento %}
+                                    <small class="text-muted text-decoration-line-through">${{ producto.precio_anterior }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-primary btn-sm">
+                                    Ver Detalles
+                                </a>
+                                <button class="btn btn-success btn-sm agregar-carrito" data-producto-id="{{ producto.id }}">
+                                    <i class="fas fa-cart-plus me-1"></i>Agregar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-search" style="font-size: 4rem; color: #6c757d;"></i>
+                    <h4 class="mt-3">No se encontraron productos</h4>
+                    <p class="text-muted">Intenta ajustar los filtros de búsqueda.</p>
+                    <a href="{% url 'lista_productos' %}" class="btn btn-primary">Ver Todos los Productos</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Paginación -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Navegación de páginas">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.orden %}&orden={{ request.GET.orden }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Agregar al carrito
+    $('.agregar-carrito').click(function() {
+        var productoId = $(this).data('producto-id');
+        var button = $(this);
+        
+        $.ajax({
+            url: '{% url "agregar_al_carrito" %}',
+            method: 'POST',
+            data: JSON.stringify({
+                producto_id: productoId,
+                cantidad: 1
+            }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Mostrar mensaje de éxito
+                    var alert = $('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                        response.message +
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $('.container').first().prepend(alert);
+                    
+                    // Actualizar contador del carrito
+                    $('#carrito-count').text(response.carrito_cantidad);
+                    
+                    // Cambiar texto del botón temporalmente
+                    button.html('<i class="fas fa-check me-1"></i>Agregado');
+                    button.removeClass('btn-success').addClass('btn-secondary');
+                    
+                    setTimeout(function() {
+                        button.html('<i class="fas fa-cart-plus me-1"></i>Agregar');
+                        button.removeClass('btn-secondary').addClass('btn-success');
+                    }, 2000);
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function() {
+                alert('Error al agregar al carrito');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Pedido #{{ pedido.id }} - Mi Ecommerce{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-shopping-bag me-2"></i>Pedido #{{ pedido.id }}
+                </h4>
+                <span class="badge 
+                    {% if pedido.estado == 'pendiente' %}bg-warning
+                    {% elif pedido.estado == 'confirmado' %}bg-info
+                    {% elif pedido.estado == 'enviado' %}bg-primary
+                    {% elif pedido.estado == 'entregado' %}bg-success
+                    {% elif pedido.estado == 'cancelado' %}bg-danger
+                    {% endif %} fs-6">
+                    {{ pedido.get_estado_display }}
+                </span>
+            </div>
+            <div class="card-body">
+                <!-- Información del Pedido -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>Información del Pedido</h6>
+                        <p><strong>Fecha:</strong> {{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Total:</strong> ${{ pedido.total }}</p>
+                        <p><strong>Método de Pago:</strong> {{ pedido.metodo_pago }}</p>
+                        <p><strong>Pagado:</strong> 
+                            {% if pedido.pagado %}
+                                <span class="badge bg-success">Sí</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pendiente</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Información de Envío</h6>
+                        <p><strong>Nombre:</strong> {{ pedido.nombre_completo }}</p>
+                        <p><strong>Email:</strong> {{ pedido.email }}</p>
+                        <p><strong>Teléfono:</strong> {{ pedido.telefono }}</p>
+                        <p><strong>Dirección:</strong> {{ pedido.direccion }}</p>
+                        <p><strong>Ciudad:</strong> {{ pedido.ciudad }}</p>
+                        <p><strong>Código Postal:</strong> {{ pedido.codigo_postal }}</p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Productos del Pedido -->
+                <h6>Productos</h6>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Precio Unitario</th>
+                                <th>Cantidad</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in pedido.items.all %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" 
+                                             style="width: 50px; height: 50px; object-fit: cover;" class="me-3">
+                                        <div>
+                                            <h6 class="mb-0">{{ item.producto.nombre }}</h6>
+                                            <small class="text-muted">{{ item.producto.categoria.nombre }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${{ item.precio_unitario }}</td>
+                                <td>{{ item.cantidad }}</td>
+                                <td>${{ item.subtotal }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                <td><strong>${{ pedido.total }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Estado del Pedido</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item {% if pedido.estado == 'pendiente' or pedido.estado == 'confirmado' or pedido.estado == 'enviado' or pedido.estado == 'entregado' %}active{% endif %}">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6>Pedido Realizado</h6>
+                            <small class="text-muted">{{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item {% if pedido.estado == 'confirmado' or pedido.estado == 'enviado' or pedido.estado == 'entregado' %}active{% endif %}">
+                        <div class="timeline-marker {% if pedido.estado == 'confirmado' or pedido.estado == 'enviado' or pedido.estado == 'entregado' %}bg-success{% else %}bg-secondary{% endif %}"></div>
+                        <div class="timeline-content">
+                            <h6>Pedido Confirmado</h6>
+                            <small class="text-muted">Procesando tu pedido</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item {% if pedido.estado == 'enviado' or pedido.estado == 'entregado' %}active{% endif %}">
+                        <div class="timeline-marker {% if pedido.estado == 'enviado' or pedido.estado == 'entregado' %}bg-success{% else %}bg-secondary{% endif %}"></div>
+                        <div class="timeline-content">
+                            <h6>Enviado</h6>
+                            <small class="text-muted">En camino a tu dirección</small>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item {% if pedido.estado == 'entregado' %}active{% endif %}">
+                        <div class="timeline-marker {% if pedido.estado == 'entregado' %}bg-success{% else %}bg-secondary{% endif %}"></div>
+                        <div class="timeline-content">
+                            <h6>Entregado</h6>
+                            <small class="text-muted">Recibido en tu dirección</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle me-2"></i>Información Importante</h6>
+                    <ul class="mb-0">
+                        <li>Tiempo de entrega: 2-5 días hábiles</li>
+                        <li>Puedes rastrear tu pedido aquí</li>
+                        <li>Para consultas contacta soporte</li>
+                    </ul>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'mis_pedidos' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver a Mis Pedidos
+                    </a>
+                    <a href="{% url 'lista_productos' %}" class="btn btn-primary">
+                        <i class="fas fa-shopping-cart me-2"></i>Hacer Nueva Compra
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #dee2e6;
+}
+
+.timeline-item.active .timeline-marker {
+    border-color: #28a745;
+}
+
+.timeline-content h6 {
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.timeline-content small {
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %} 

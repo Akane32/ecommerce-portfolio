@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Checkout - Mi Ecommerce{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-credit-card me-2"></i>Información de Envío
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.nombre_completo|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.email|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.telefono|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.ciudad|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.direccion|as_crispy_field }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.codigo_postal|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.metodo_pago|as_crispy_field }}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-check me-2"></i>Confirmar Pedido
+                        </button>
+                        <a href="{% url 'carrito' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver al Carrito
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Resumen del Pedido</h5>
+            </div>
+            <div class="card-body">
+                {% for item in carrito.items.all %}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center">
+                        <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" 
+                             style="width: 40px; height: 40px; object-fit: cover;" class="me-2">
+                        <div>
+                            <h6 class="mb-0">{{ item.producto.nombre }}</h6>
+                            <small class="text-muted">Cantidad: {{ item.cantidad }}</small>
+                        </div>
+                    </div>
+                    <span class="fw-bold">${{ item.subtotal }}</span>
+                </div>
+                {% endfor %}
+                
+                <hr>
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal:</span>
+                    <span>${{ carrito.total }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Envío:</span>
+                    <span>Gratis</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <strong>Total:</strong>
+                    <strong>${{ carrito.total }}</strong>
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Información importante:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>El envío es gratuito para pedidos superiores a $50</li>
+                        <li>Tiempo de entrega: 2-5 días hábiles</li>
+                        <li>Puedes rastrear tu pedido desde tu cuenta</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

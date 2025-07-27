@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio - Mi Ecommerce{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-primary text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">Bienvenido a Mi Ecommerce</h1>
+                <p class="lead">Descubre los mejores productos con precios increíbles. Envío rápido y seguro a todo el país.</p>
+                <a href="{% url 'lista_productos' %}" class="btn btn-light btn-lg">Ver Productos</a>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-shopping-bag" style="font-size: 8rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Categorías -->
+<section class="mb-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Categorías</h2>
+        <div class="row">
+            {% for categoria in categorias %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 product-card">
+                    {% if categoria.imagen %}
+                        <img src="{{ categoria.imagen.url }}" class="card-img-top" alt="{{ categoria.nombre }}">
+                    {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center">
+                            <i class="fas fa-tag" style="font-size: 3rem; color: #6c757d;"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ categoria.nombre }}</h5>
+                        <p class="card-text">{{ categoria.descripcion|truncatewords:10 }}</p>
+                        <a href="{% url 'lista_productos' %}?categoria={{ categoria.id }}" class="btn btn-outline-primary">
+                            Ver Productos
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No hay categorías disponibles.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Productos Destacados -->
+<section class="mb-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Productos Destacados</h2>
+        <div class="row">
+            {% for producto in productos_destacados %}
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100 product-card">
+                    <div class="position-relative">
+                        <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}">
+                        {% if producto.tiene_descuento %}
+                            <span class="badge bg-danger badge-discount">-{{ producto.porcentaje_descuento }}%</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ producto.nombre }}</h5>
+                        <p class="card-text text-muted">{{ producto.descripcion|truncatewords:15 }}</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="h5 text-primary mb-0">${{ producto.precio }}</span>
+                                {% if producto.tiene_descuento %}
+                                    <small class="text-muted text-decoration-line-through">${{ producto.precio_anterior }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-primary btn-sm">
+                                    Ver Detalles
+                                </a>
+                                <button class="btn btn-success btn-sm agregar-carrito" data-producto-id="{{ producto.id }}">
+                                    <i class="fas fa-cart-plus me-1"></i>Agregar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No hay productos destacados disponibles.</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% if productos_destacados %}
+        <div class="text-center mt-4">
+            <a href="{% url 'lista_productos' %}" class="btn btn-primary btn-lg">Ver Todos los Productos</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Características -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="mb-3">
+                    <i class="fas fa-shipping-fast text-primary" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Envío Rápido</h5>
+                <p class="text-muted">Recibe tus productos en 24-48 horas en todo el país.</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="mb-3">
+                    <i class="fas fa-shield-alt text-primary" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Compra Segura</h5>
+                <p class="text-muted">Transacciones seguras con protección de datos.</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="mb-3">
+                    <i class="fas fa-headset text-primary" style="font-size: 3rem;"></i>
+                </div>
+                <h5>Soporte 24/7</h5>
+                <p class="text-muted">Atención al cliente disponible en todo momento.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Agregar al carrito
+    $('.agregar-carrito').click(function() {
+        var productoId = $(this).data('producto-id');
+        var button = $(this);
+        
+        $.ajax({
+            url: '{% url "agregar_al_carrito" %}',
+            method: 'POST',
+            data: JSON.stringify({
+                producto_id: productoId,
+                cantidad: 1
+            }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Mostrar mensaje de éxito
+                    var alert = $('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                        response.message +
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $('.container').first().prepend(alert);
+                    
+                    // Actualizar contador del carrito
+                    $('#carrito-count').text(response.carrito_cantidad);
+                    
+                    // Cambiar texto del botón temporalmente
+                    button.html('<i class="fas fa-check me-1"></i>Agregado');
+                    button.removeClass('btn-success').addClass('btn-secondary');
+                    
+                    setTimeout(function() {
+                        button.html('<i class="fas fa-cart-plus me-1"></i>Agregar');
+                        button.removeClass('btn-secondary').addClass('btn-success');
+                    }, 2000);
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function() {
+                alert('Error al agregar al carrito');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 
