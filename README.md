@@ -191,8 +191,8 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 ## 👨‍💻 Autor
 
 **Tu Nombre**
-- GitHub: [@tu-usuario](https://github.com/tu-usuario)
-- LinkedIn: [Tu Perfil](https://linkedin.com/in/tu-perfil)
+- GitHub: [@Akane32](https://github.com/Akane32)
+- LinkedIn: [Cristobal Astudillo Castillo](https://www.linkedin.com/in/cristobal-astudillo-castillo-69579a275/)
 
 ## 🙏 Agradecimientos
 
