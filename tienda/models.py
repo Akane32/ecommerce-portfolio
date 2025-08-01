@@ -131,7 +131,12 @@ class Pedido(models.Model):
     codigo_postal = models.CharField(max_length=10)
     
     # Información de pago
-    metodo_pago = models.CharField(max_length=50, default='transferencia')
+    METODO_PAGO_CHOICES = [
+        ('transferencia', 'Transferencia bancaria'),
+        ('tarjeta', 'Tarjeta de crédito/débito'),
+        ('paypal', 'PayPal'),
+    ]
+    metodo_pago = models.CharField(max_length=50, choices=METODO_PAGO_CHOICES, default='transferencia')
     pagado = models.BooleanField(default=False)
     fecha_pago = models.DateTimeField(null=True, blank=True)
 

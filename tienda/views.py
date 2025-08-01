@@ -196,6 +196,7 @@ def checkout(request):
             pedido = form.save(commit=False)
             pedido.usuario = request.user
             pedido.total = carrito.total
+            pedido.pagado = True
             pedido.save()
             
             # Crear items del pedido
